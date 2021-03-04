@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { idbPromise } from '../../utils/helpers';
 import { useQuery } from '@apollo/react-hooks';
 
 import ProductItem from "../ProductItem";
@@ -20,8 +21,19 @@ function ProductList() {
         type: UPDATE_PRODUCTS,
         products: data.products
       });
+
+      data.products.forEach((product) => {
+        idbPromise('products', 'put', product);
+      });
+    } else if (!loading) {
+      idbPromise('products', 'get').then((products) => {
+        dispatch({
+          type: UPDATE_PRODUCTS,
+          products: products
+        });
+      });
     }
-  }, [data, dispatch]);
+  }, [data, loading, dispatch]);
 
   function filterProducts() {
     if (!currentCategory) {
